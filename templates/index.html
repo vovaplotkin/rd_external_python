@@ -1,10 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
-  <h1>Hello, Vova!</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Title</title>
+{% endblock %}
+
+{% block body %}
+<div class="department">
+  <h1>Departments</h1>
+
+  <table>
+    <tr>
+      <th>Department</th>
+      <th>Average salary</th>
+      <th>Actions</th>
+    </tr>
+    {% for department in departments %}
+      <tr>
+        <td>{{ department.department }}</td>
+        <td>{{ department.id }}</td>
+        <td>
+          <a href="">Delete</a>
+          <br>
+          <a href="">Edit</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <form action="/" method="POST">
+    <input type="text" name="department" id="department">
+    <input type="submit" value="add department">
+  </form>
+</div>
+{% endblock %}
