@@ -9,7 +9,7 @@ db = SQLAlchemy(app)
 
 class Departments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    department = db.Column(db.Text, nullable=False)
+    department = db.Column(db.Text, unique=True, nullable=False)
 
     def __repr__(self):
         return f'<Department {self.id}>'
