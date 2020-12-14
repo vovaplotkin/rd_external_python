@@ -38,7 +38,32 @@ def index():
             return 'The error occurs while adding new department'
     else:
         departments = Departments.query.all()
-        return render_template("index.html", departments=departments)
+        return render_template('index.html', departments=departments)
+
+
+@app.route('/departments/delete/<int:id>')
+def delete_department(id):
+    dept_to_delete = Departments.query.get_or_404(id)
+    try:
+        db.session.delete(dept_to_delete)
+        db.session.commit()
+        return redirect('/')
+    except:
+        return 'The error occurs while deleting department'
+
+
+@app.route('/departments/edit/<int:id>', methods=['POST', 'GET'])
+def edit_department(id):
+    department = Departments.query.get_or_404(id)
+    if request.method == 'POST':
+        department.department = request.form['department']
+        try:
+            db.session.commit()
+            return redirect('/')
+        except:
+            return 'The error occurs while editing department'
+    else:
+        return render_template('edit_department.html', department=department)
 
 
 if __name__ == '__main__':
