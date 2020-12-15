@@ -5,5 +5,31 @@
 {% endblock %}
 
 {% block body %}
-<h1>Template</h1>
+<div class="department">
+  <h1>Departments</h1>
+
+  <table>
+    <tr>
+      <th>Department</th>
+      <th>Average salary</th>
+      <th>Actions</th>
+    </tr>
+    {% for department in departments %}
+      <tr>
+        <td><a href="/departments/{{department.id}}">{{ department.department }}</a></td>
+        <td>{{ department.id }}</td>
+        <td>
+          <a href="/departments/delete/{{department.id}}">Delete</a>
+          <br>
+          <a href="/departments/edit/{{department.id}}">Edit</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <form action="/" method="POST">
+    <input type="text" name="department" id="department">
+    <input type="submit" value="add department">
+  </form>
+</div>
 {% endblock %}

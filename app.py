@@ -1,3 +1,4 @@
+from datetime import date
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 
@@ -38,7 +39,7 @@ def index():
             return 'The error occurs while adding new department'
     else:
         departments = Departments.query.all()
-        return render_template('index.html', departments=departments)
+        return render_template('departments.html', departments=departments)
 
 
 @app.route('/departments/delete/<int:id>')
@@ -64,6 +65,59 @@ def edit_department(id):
             return 'The error occurs while editing department'
     else:
         return render_template('edit_department.html', department=department)
+
+
+@app.route('/departments/<int:id>', methods=['POST', 'GET'])
+def employees_department(id):
+    if request.method == 'POST':
+        name = request.form['name']
+        date_of_birth = date.fromisoformat(request.form['date_of_birth'])
+        salary = float(request.form['salary'])
+        new_employee = Employees(
+            name=name,
+            department_id=id,
+            date_of_birth=date_of_birth,
+            salary=salary
+        )
+        try:
+            db.session.add(new_employee)
+            db.session.commit()
+            return redirect(f'/departments/{id}')
+        except:
+            return 'The error occurs while adding new employee'
+    else:
+        employees = Employees.query.filter_by(department_id=id).all()
+        department = Departments.query.get_or_404(id)
+        return render_template('department.html', employees=employees, department=department)
+
+
+@app.route('/employees/delete/<int:id>')
+def delete_employee(id):
+    employee = Employees.query.get_or_404(id)
+    department_id = employee.department_id
+    try:
+        db.session.delete(employee)
+        db.session.commit()
+        return redirect(f'/departments/{department_id}')
+    except:
+        return 'The error occurs while deleting employee'
+
+
+@app.route('/departments/edit/<int:id>', methods=['POST', 'GET'])
+def edit_employee(id):
+    employee = Employees.query.get_or_404(id)
+    if request.method == 'POST':
+        employee.name = request.form['name']
+        employee.department_id = request.form['department_id']
+        employee.date_of_birth = date.fromisoformat(request.form['date_of_birth'])
+        employee.salary = float(request.form['salary'])
+        try:
+            db.session.commit()
+            return redirect(f'/departments/{employee.department_id}')
+        except:
+            return 'The error occurs while editing employee'
+    else:
+        return render_template('edit_employee.html', department=department)
 
 
 if __name__ == '__main__':

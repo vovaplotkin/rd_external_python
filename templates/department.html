@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Employees</title>
+{% endblock %}
+
+{% block body %}
+<div class="department">
+  <h1>{{ department.department }} Employees</h1>
+
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>Date of birth</th>
+      <th>Salary</th>
+      <th>Actions</th>
+    </tr>
+    {% for employee in employees %}
+      <tr>
+        <td>{{ employee.name }}</td>
+        <td>{{ employee.date_of_birth }}</td>
+        <td>{{ employee.salary|round(2) }}</td>
+        <td>
+          <a href="/employees/delete/{{employee.id}}">Delete</a>
+          <br>
+          <a href="/employees/edit/{{employee.id}}">Edit</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <form action="/departments/{{ department.id }}" method="POST">
+    <label for="name">Employee name:</label><br>
+    <input type="text" id="name" name="name"><br>
+    <label for="date_of_birth">Date of birth:</label><br>
+    <input type="date" id="date_of_birth" name="date_of_birth"><br>
+    <label for="salary">Salary:</label><br>
+    <input type="text" id="salary" name="salary"><br><br>
+    <input type="submit" value="add">
+  </form>
+</div>
+{% endblock %}
