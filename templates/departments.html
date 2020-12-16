@@ -7,6 +7,18 @@
 {% block body %}
 <div class="department">
   <h1>Departments</h1>
+  <form action="/departments/add">
+    <input type="submit" value="Add Department">
+  </form><br>
+
+  <script>
+  function delete_department(department_id) {
+    var r = confirm("Delete department?");
+    if (r == true) {
+      window.location.href = "/departments/delete/" + department_id;
+    }
+  }
+  </script>
 
   <table>
     <tr>
@@ -19,17 +31,13 @@
         <td><a href="/departments/{{department.id}}">{{ department.department }}</a></td>
         <td>{{ department.avg_salary }}</td>
         <td>
-          <a href="/departments/delete/{{department.id}}">Delete</a>
+          <button onclick="delete_department({{ department.id }})">Delete</button>
           <br>
-          <a href="/departments/edit/{{department.id}}">Edit</a>
+          <a href="/departments/edit/{{ department.id }}">Edit</a>
         </td>
       </tr>
     {% endfor %}
   </table>
 
-  <form action="/" method="POST">
-    <input type="text" name="department" id="department">
-    <input type="submit" value="add department">
-  </form>
 </div>
 {% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Employees</title>
+{% endblock %}
+
+{% block body %}
+<div class="department">
+  <h1>Adding Employee to {{department.department}} Department</h1>
+  <form action="/departments/{{ department.id }}/employees/add" method="POST">
+    <label for="name">Employee name:</label><br>
+    <input type="text" id="name" name="name"><br>
+    <label for="date_of_birth">Date of birth:</label><br>
+    <input type="date" id="date_of_birth" name="date_of_birth"><br>
+    <label for="salary">Salary:</label><br>
+    <input type="text" id="salary" name="salary"><br><br>
+    <input type="submit" value="add">
+  </form>
+</div>
+{% endblock %}

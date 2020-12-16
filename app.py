@@ -27,8 +27,20 @@ class Employees(db.Model):
         return f'<Employee {self.id}>'
 
 
-@app.route('/', methods=['POST', 'GET'])
-def index():
+@app.route('/')
+def departments():
+    departments_salary = db.session.\
+        query(
+            Departments.id,
+            Departments.department,
+            db.func.avg(Employees.salary).label('avg_salary')
+        ).outerjoin(Employees, Departments.id == Employees.department_id)\
+        .group_by(Departments.id, Departments.department).all()
+    return render_template('departments.html', departments_salary=departments_salary)
+
+
+@app.route('/departments/add', methods=['POST', 'GET'])
+def add_department():
     if request.method == 'POST':
         department = request.form['department']
         new_dept = Departments(department=department)
@@ -39,14 +51,7 @@ def index():
         except:
             return 'The error occurs while adding new department'
     else:
-        departments_salary = db.session.\
-            query(
-                Departments.id,
-                Departments.department,
-                db.func.avg(Employees.salary).label('avg_salary')
-            ).outerjoin(Employees, Departments.id == Employees.department_id)\
-            .group_by(Departments.id, Departments.department).all()
-        return render_template('departments.html', departments_salary=departments_salary)
+        return render_template('add_department.html')
 
 
 @app.route('/departments/delete/<int:id>')
@@ -74,8 +79,15 @@ def edit_department(id):
         return render_template('edit_department.html', department=department)
 
 
-@app.route('/departments/<int:id>', methods=['POST', 'GET'])
-def employees_department(id):
+@app.route('/departments/<int:id>')
+def employees_by_department(id):
+    employees = Employees.query.filter_by(department_id=id).all()
+    department = Departments.query.get_or_404(id)
+    return render_template('employees_by_department.html', employees=employees, department=department)
+
+
+@app.route('/departments/<int:id>/employees/add', methods=['POST', 'GET'])
+def add_employee(id):
     if request.method == 'POST':
         name = request.form['name']
         date_of_birth = date.fromisoformat(request.form['date_of_birth'])
@@ -93,9 +105,8 @@ def employees_department(id):
         except:
             return 'The error occurs while adding new employee'
     else:
-        employees = Employees.query.filter_by(department_id=id).all()
         department = Departments.query.get_or_404(id)
-        return render_template('department.html', employees=employees, department=department)
+        return render_template('add_employee.html', department=department)
 
 
 @app.route('/employees/delete/<int:id>')
@@ -113,7 +124,6 @@ def delete_employee(id):
 @app.route('/employees/edit/<int:id>', methods=['POST', 'GET'])
 def edit_employee(id):
     employee = Employees.query.get_or_404(id)
-    departments = Departments.query.all()
     if request.method == 'POST':
         employee.name = request.form['name']
         employee.department_id = db.session.query(Departments.id)\
@@ -123,10 +133,10 @@ def edit_employee(id):
         try:
             db.session.commit()
             return redirect(f'/departments/{employee.department_id}')
-        # except:
-        #     return 'The error occurs while editing employee'
-        finally: pass
+        except:
+            return 'The error occurs while editing employee'
     else:
+        departments = Departments.query.all()
         return render_template('edit_employee.html', employee=employee, departments=departments)
 
 
