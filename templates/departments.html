@@ -14,10 +14,10 @@
       <th>Average salary</th>
       <th>Actions</th>
     </tr>
-    {% for department in departments %}
+    {% for department in departments_salary %}
       <tr>
         <td><a href="/departments/{{department.id}}">{{ department.department }}</a></td>
-        <td>{{ department.id }}</td>
+        <td>{{ department.avg_salary }}</td>
         <td>
           <a href="/departments/delete/{{department.id}}">Delete</a>
           <br>

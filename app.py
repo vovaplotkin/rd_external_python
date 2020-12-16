@@ -15,12 +15,13 @@ class Departments(db.Model):
     def __repr__(self):
         return f'<Department {self.id}>'
 
+
 class Employees(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
     date_of_birth = db.Column(db.Date, nullable=False)
-    salary = db.Column(db.Numeric, nullable=False)
+    salary = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f'<Employee {self.id}>'
@@ -38,8 +39,14 @@ def index():
         except:
             return 'The error occurs while adding new department'
     else:
-        departments = Departments.query.all()
-        return render_template('departments.html', departments=departments)
+        departments_salary = db.session.\
+            query(
+                Departments.id,
+                Departments.department,
+                db.func.avg(Employees.salary).label('avg_salary')
+            ).outerjoin(Employees, Departments.id == Employees.department_id)\
+            .group_by(Departments.id, Departments.department).all()
+        return render_template('departments.html', departments_salary=departments_salary)
 
 
 @app.route('/departments/delete/<int:id>')
@@ -72,7 +79,7 @@ def employees_department(id):
     if request.method == 'POST':
         name = request.form['name']
         date_of_birth = date.fromisoformat(request.form['date_of_birth'])
-        salary = float(request.form['salary'])
+        salary = request.form['salary']
         new_employee = Employees(
             name=name,
             department_id=id,
@@ -103,21 +110,24 @@ def delete_employee(id):
         return 'The error occurs while deleting employee'
 
 
-@app.route('/departments/edit/<int:id>', methods=['POST', 'GET'])
+@app.route('/employees/edit/<int:id>', methods=['POST', 'GET'])
 def edit_employee(id):
     employee = Employees.query.get_or_404(id)
+    departments = Departments.query.all()
     if request.method == 'POST':
         employee.name = request.form['name']
-        employee.department_id = request.form['department_id']
+        employee.department_id = db.session.query(Departments.id)\
+            .filter_by(department=request.form['department']).first().id
         employee.date_of_birth = date.fromisoformat(request.form['date_of_birth'])
         employee.salary = float(request.form['salary'])
         try:
             db.session.commit()
             return redirect(f'/departments/{employee.department_id}')
-        except:
-            return 'The error occurs while editing employee'
+        # except:
+        #     return 'The error occurs while editing employee'
+        finally: pass
     else:
-        return render_template('edit_employee.html', department=department)
+        return render_template('edit_employee.html', employee=employee, departments=departments)
 
 
 if __name__ == '__main__':

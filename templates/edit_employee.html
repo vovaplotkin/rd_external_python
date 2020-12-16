@@ -8,8 +8,19 @@
 <div class="employee">
   <h1>Edit employee</h1>
 
-  <form action="/employees/edit/{{employee.id}}" method="POST">
-    <input type="text" name="department" id="department" value="{{department.department}}">
+  <form action="/employees/edit/{{ employee.id }}" method="POST">
+    <label for="name">Employee name:</label><br>
+    <input type="text" id="name" name="name" value="{{ employee.name }}"><br>
+    <label for="department">Department:</label><br>
+    <select id="department" name="department">
+    {% for department in departments %}
+      <option value="{{ department.department }}">{{ department.department }}</option>
+    {% endfor %}
+    </select><br>
+    <label for="date_of_birth">Date of birth:</label><br>
+    <input type="date" id="date_of_birth" name="date_of_birth" value="{{ employee.date_of_birth }}"><br>
+    <label for="salary">Salary:</label><br>
+    <input type="text" id="salary" name="salary" value="{{ employee.salary }}"><br><br>
     <input type="submit" value="edit">
   </form>
 </div>
