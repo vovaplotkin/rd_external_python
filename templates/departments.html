@@ -33,7 +33,10 @@
         <td>
           <button onclick="delete_department({{ department.id }})">Delete</button>
           <br>
-          <a href="/departments/edit/{{ department.id }}">Edit</a>
+          <!--<a href="/departments/edit/{{ department.id }}">Edit</a>-->
+          <form action="/departments/edit/{{ department.id }}">
+            <input type="submit" value="Edit">
+          </form>
         </td>
       </tr>
     {% endfor %}

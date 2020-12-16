@@ -22,6 +22,9 @@
     <label for="salary">Salary:</label><br>
     <input type="text" id="salary" name="salary" value="{{ employee.salary }}"><br><br>
     <input type="submit" value="edit">
+    <input type="button"
+           onclick="location.href='/departments/{{ employee.department_id }}'"
+           value="cancel">
   </form>
 </div>
 {% endblock %}

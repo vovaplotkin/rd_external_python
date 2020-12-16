@@ -36,7 +36,10 @@
         <td>
           <button onclick="delete_employee({{ employee.id }})">Delete</button>
           <br>
-          <a href="/employees/edit/{{ employee.id }}">Edit</a>
+          <!--<a href="/employees/edit/{{ employee.id }}">Edit</a>-->
+          <form action="/employees/edit/{{ employee.id }}">
+            <input type="submit" value="Edit">
+          </form>
         </td>
       </tr>
     {% endfor %}

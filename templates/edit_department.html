@@ -8,9 +8,10 @@
 <div class="department">
   <h1>Edit department</h1>
 
-  <form action="/departments/edit/{{department.id}}" method="POST">
-    <input type="text" name="department" id="department" value="{{department.department}}">
+  <form action="/departments/edit/{{ department.id }}" method="POST">
+    <input type="text" name="department" id="department" value="{{ department.department }}">
     <input type="submit" value="edit">
+    <input type="button" onclick="location.href='/'" value="cancel">
   </form>
 </div>
 {% endblock %}
