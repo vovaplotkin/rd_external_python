@@ -1,5 +1,10 @@
+h1, form {
+  text-align: center;
+}
+
 table {
   border-collapse: collapse;
+  margin: auto;
 }
 
 th, td {
