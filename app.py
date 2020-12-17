@@ -56,8 +56,18 @@ def add_department():
 
 @app.route('/departments/delete/<int:id>')
 def delete_department(id):
+    employees = Employees.query.filter_by(department_id=id)
     dept_to_delete = Departments.query.get_or_404(id)
     try:
+        if employees:
+            dept_others = Departments.query.filter_by(department='Others').first()
+            if not dept_others:
+                new_dept = Departments(department='Others')
+                db.session.add(new_dept)
+                db.session.commit()
+                dept_others = Departments.query.filter_by(department='Others').first()
+            employees.update({'department_id': dept_others.id})
+            db.session.commit()
         db.session.delete(dept_to_delete)
         db.session.commit()
         return redirect('/')
