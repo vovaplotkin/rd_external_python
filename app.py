@@ -29,13 +29,15 @@ class Employees(db.Model):
 
 @app.route('/')
 def departments():
+    avg_salary = db.func.avg(Employees.salary).label('avg_salary')
     departments_salary = db.session.\
         query(
             Departments.id,
             Departments.department,
-            db.func.avg(Employees.salary).label('avg_salary')
+            avg_salary
         ).outerjoin(Employees, Departments.id == Employees.department_id)\
-        .group_by(Departments.id, Departments.department).all()
+        .group_by(Departments.id, Departments.department)\
+        .order_by(avg_salary.desc()).all()
     return render_template('departments.html', departments_salary=departments_salary)
 
 
@@ -59,13 +61,15 @@ def delete_department(id):
     employees = Employees.query.filter_by(department_id=id)
     dept_to_delete = Departments.query.get_or_404(id)
     try:
-        if employees:
+        if employees.all():
             dept_others = Departments.query.filter_by(department='Others').first()
             if not dept_others:
                 new_dept = Departments(department='Others')
                 db.session.add(new_dept)
                 db.session.commit()
                 dept_others = Departments.query.filter_by(department='Others').first()
+            if dept_others.id == dept_to_delete.id:
+                return redirect('/')
             employees.update({'department_id': dept_others.id})
             db.session.commit()
         db.session.delete(dept_to_delete)
@@ -89,11 +93,34 @@ def edit_department(id):
         return render_template('edit_department.html', department=department)
 
 
-@app.route('/departments/<int:id>')
+@app.route('/departments/<int:id>', methods=['POST', 'GET'])
 def employees_by_department(id):
+    message = ''
     employees = Employees.query.filter_by(department_id=id).all()
     department = Departments.query.get_or_404(id)
-    return render_template('employees_by_department.html', employees=employees, department=department)
+    if request.method == 'POST':
+        start = request.form['from']
+        end = request.form['by']
+        if start and end:
+            if start <= end:
+                employees = Employees.query\
+                    .filter_by(department_id=id)\
+                    .filter(Employees.date_of_birth >= start)\
+                    .filter(Employees.date_of_birth <= end).all()
+            else:
+                message = 'Warning! From date should be less than by date'
+        elif start and not end:
+            employees = Employees.query\
+                .filter_by(department_id=id)\
+                .filter(Employees.date_of_birth >= start).all()
+        elif end and not start:
+            employees = Employees.query\
+                .filter_by(department_id=id)\
+                .filter(Employees.date_of_birth <= end).all()
+    return render_template('employees_by_department.html',
+                           employees=employees,
+                           department=department,
+                           message=message)
 
 
 @app.route('/departments/<int:id>/employees/add', methods=['POST', 'GET'])
@@ -134,15 +161,16 @@ def delete_employee(id):
 @app.route('/employees/edit/<int:id>', methods=['POST', 'GET'])
 def edit_employee(id):
     employee = Employees.query.get_or_404(id)
+    old_department = employee.department_id
     if request.method == 'POST':
         employee.name = request.form['name']
-        employee.department_id = db.session.query(Departments.id)\
+        employee.department_id = Departments.query\
             .filter_by(department=request.form['department']).first().id
         employee.date_of_birth = date.fromisoformat(request.form['date_of_birth'])
         employee.salary = float(request.form['salary'])
         try:
             db.session.commit()
-            return redirect(f'/departments/{employee.department_id}')
+            return redirect(f'/departments/{old_department}')
         except:
             return 'The error occurs while editing employee'
     else:

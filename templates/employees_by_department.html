@@ -12,6 +12,16 @@
     <input type="submit" value="Add Employee">
   </form><br>
 
+  <form action="/departments/{{ department.id }}" method="POST">
+    <label for="from">Date from:</label>
+    <input type="date" id="from" name="from">
+    <label for="by">by:</label>
+    <input type="date" id="by" name="by">
+    <input type="submit" value="filter">
+  </form>
+
+  <h4>{{ message }}</h4>
+
   <script>
   function delete_employee(employee_id) {
     var r = confirm("Delete employee?");
