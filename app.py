@@ -12,6 +12,7 @@ migrate = Migrate(app, db)
 
 
 class Departments(db.Model):
+    """Departments model"""
     id = db.Column(db.Integer, primary_key=True)
     department = db.Column(db.Text, unique=True, nullable=False)
 
@@ -20,6 +21,7 @@ class Departments(db.Model):
 
 
 class Employees(db.Model):
+    """Employees model"""
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
@@ -32,6 +34,15 @@ class Employees(db.Model):
 
 @app.route('/')
 def departments():
+    """
+    Departments route
+
+    Args:
+        None
+
+    Returns:
+        'departments.html' with list of departments and their avg salary
+    """
     avg_salary = db.func.avg(Employees.salary).label('avg_salary')
     departments_salary = db.session.\
         query(
@@ -46,6 +57,15 @@ def departments():
 
 @app.route('/departments/add', methods=['POST', 'GET'])
 def add_department():
+    """
+    Add department route
+
+    Args:
+        None
+
+    Returns:
+        'add_department.html' with form to add new department
+    """
     if request.method == 'POST':
         department = request.form['department']
         new_dept = Departments(department=department)
@@ -61,6 +81,15 @@ def add_department():
 
 @app.route('/departments/delete/<int:id>')
 def delete_department(id):
+    """
+    Delete department route
+
+    Args:
+        id: department id
+
+    Returns:
+        'departments.html' without deleted department
+    """
     employees = Employees.query.filter_by(department_id=id)
     dept_to_delete = Departments.query.get_or_404(id)
     try:
@@ -84,6 +113,15 @@ def delete_department(id):
 
 @app.route('/departments/edit/<int:id>', methods=['POST', 'GET'])
 def edit_department(id):
+    """
+    Edit department route
+
+    Args:
+        id: department id
+
+    Returns:
+        'edit_department.html' for editing department or redirect to '/'
+    """
     department = Departments.query.get_or_404(id)
     if request.method == 'POST':
         department.department = request.form['department']
@@ -98,6 +136,15 @@ def edit_department(id):
 
 @app.route('/departments/<int:id>', methods=['POST', 'GET'])
 def employees_by_department(id):
+    """
+    Employees by department route
+
+    Args:
+        id: department id
+
+    Returns:
+        'employees_by_department.html' with list of employees in department
+    """
     message = ''
     employees = Employees.query.filter_by(department_id=id).all()
     department = Departments.query.get_or_404(id)
@@ -128,6 +175,15 @@ def employees_by_department(id):
 
 @app.route('/departments/<int:id>/employees/add', methods=['POST', 'GET'])
 def add_employee(id):
+    """
+    Add employee to department route
+
+    Args:
+        id: department id
+
+    Returns:
+        'add_employee.html' form or redirect to '/departments/{id}'
+    """
     if request.method == 'POST':
         name = request.form['name']
         date_of_birth = date.fromisoformat(request.form['date_of_birth'])
@@ -151,6 +207,15 @@ def add_employee(id):
 
 @app.route('/employees/delete/<int:id>')
 def delete_employee(id):
+    """
+    Delete employee route
+
+    Args:
+        id: employee id
+
+    Returns:
+        '/departments/{id}' without deleted employee
+    """
     employee = Employees.query.get_or_404(id)
     department_id = employee.department_id
     try:
@@ -163,8 +228,17 @@ def delete_employee(id):
 
 @app.route('/employees/edit/<int:id>', methods=['POST', 'GET'])
 def edit_employee(id):
+    """
+    Edit employee route
+
+    Args:
+        id: employee id
+
+    Returns:
+        'edit_employee.html' form or redirect to '/departments/{old_department_id}'
+    """
     employee = Employees.query.get_or_404(id)
-    old_department = employee.department_id
+    old_department_id = employee.department_id
     if request.method == 'POST':
         employee.name = request.form['name']
         employee.department_id = Departments.query\
@@ -173,7 +247,7 @@ def edit_employee(id):
         employee.salary = float(request.form['salary'])
         try:
             db.session.commit()
-            return redirect(f'/departments/{old_department}')
+            return redirect(f'/departments/{old_department_id}')
         except:
             return 'The error occurs while editing employee'
     else:
